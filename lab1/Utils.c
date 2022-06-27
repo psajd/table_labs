@@ -199,6 +199,7 @@ int delete_all_in(struct Table *table)
     }
     if (ks != 1 && ks != 2){
         fprintf(stderr, "Error: keyspace not found");
+        return EXIT_FAILURE;
     }
 
     printf("Enter the key1\n");
