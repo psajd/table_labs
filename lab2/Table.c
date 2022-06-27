@@ -5,35 +5,48 @@ struct Table table_initializer(int size1, int size2, const char *filename) {
     struct Table table;
     table.msize1 = size1;
     table.msize2 = size2;
-    table.csize1 = 0;
-    table.csize2 = 0;
-    table.ks1_offset = 0;
-    table.ks2_offset = (int) sizeof(KeySpace1) * size1;
-    int filename_length = (int) strlen(filename);
-    table.filename = malloc(filename_length + 1);
-    strcpy(table.filename, filename);
-    table.file = fopen(table.filename, "wb+");
+    FILE *temp = fopen(filename, "r");
 
-    struct KeySpace1 *keySpace1 = malloc(sizeof(KeySpace1) * size1);
-    for (int i = 0; i < size1; i++) {
-        keySpace1[i].key = 0;
-        keySpace1[i].item_offset = 0;
-        keySpace1[i].busy = 0;
+    if (temp == NULL) {
+        fclose(temp);
+        table.file = fopen(filename, "wb+");
+        table.csize1 = 0;
+        table.csize2 = 0;
+        fwrite(&table.csize2, sizeof(int), 1, table.file);
+        table.ks1_offset = sizeof(int );
+        table.ks2_offset = (int) sizeof(KeySpace1) * size1 + table.ks1_offset;
+        int filename_length = (int) strlen(filename);
+        table.filename = malloc(filename_length + 1);
+        strcpy(table.filename, filename);
+
+
+        struct KeySpace1 *keySpace1 = malloc(sizeof(KeySpace1) * size1);
+        for (int i = 0; i < size1; i++) {
+            keySpace1[i].busy = 0;
+        }
+        fwrite(keySpace1, sizeof(KeySpace1), size1, table.file);
+        free(keySpace1);
+
+        struct KeySpace2 *keySpace2 = malloc(sizeof(KeySpace2) * size2);
+        for (int i = 0; i < size2; i++) {
+            keySpace2[i].busy = 0;
+        }
+        fwrite(keySpace2, sizeof(KeySpace2), size2, table.file);
+        free(keySpace2);
+    }else{
+        fclose(temp);
+        table.file = fopen(filename, "rb+");
+        table.csize1 = size1;
+        fread(&table.csize2, sizeof(int), 1, table.file);
+        table.ks1_offset = sizeof(int);
+        table.ks2_offset = (int) sizeof(KeySpace1) * size1 + table.ks1_offset;
+        int filename_length = (int) strlen(filename);
+        table.filename = malloc(filename_length + 1);
+        strcpy(table.filename, filename);
     }
-    fwrite(keySpace1, sizeof(KeySpace1), size1, table.file);
-    free(keySpace1);
-
-    struct KeySpace2 *keySpace2 = malloc(sizeof(KeySpace2) * size2);
-    for (int i = 0; i < size2; i++) {
-        keySpace2[i].key = 0;
-        keySpace2[i].item_offset = 0;
-        keySpace2[i].busy = 0;
-    }
-    fwrite(keySpace2, sizeof(KeySpace2), size2, table.file);
-    free(keySpace2);
-
     return table;
 }
+
 
 int file_check(FILE *a) {
     if (!a) {
@@ -163,6 +176,10 @@ int delete(struct Table *table, int k1, int k2) {
 int delete_all(struct Table *table, int k, int ks) {
     if (ks == 1) {
         int l1 = k;
+        if (search_ks1(table, k) < 0){
+            fprintf(stderr, "Error: there is no element in the table\n");
+            return EXIT_FAILURE;
+        }
         KeySpace1 *temp_ks1 = malloc(sizeof(KeySpace1));
         fseek(table->file, search_ks1(table, k), SEEK_SET);
         fread(temp_ks1, sizeof(KeySpace1), 1, table->file);
@@ -172,7 +189,7 @@ int delete_all(struct Table *table, int k, int ks) {
         fread(temp_item, sizeof(Item), 1, table->file);
 
         KeySpace2 *temp_ks2 = malloc(sizeof(KeySpace2));
-        fseek(table->file, temp_item->key2_index * (int) sizeof(KeySpace2) + table->msize1 * (int) sizeof(KeySpace1),
+        fseek(table->file, temp_item->key2_index * (int) sizeof(KeySpace2) + table->ks2_offset,
               SEEK_SET);
         fread(temp_ks2, sizeof(KeySpace2), 1, table->file);
 
@@ -183,6 +200,10 @@ int delete_all(struct Table *table, int k, int ks) {
 
         return delete(table, l1, l2);
     } else {
+        if (search_ks2(table, k) < 0){
+            fprintf(stderr, "Error: there is no element in the table\n");
+            return EXIT_FAILURE;
+        }
         int l2 = k;
         KeySpace2 *temp_ks2 = malloc(sizeof(KeySpace2));
         fseek(table->file, search_ks2(table, k), SEEK_SET);
@@ -193,7 +214,7 @@ int delete_all(struct Table *table, int k, int ks) {
         fread(temp_item, sizeof(Item), 1, table->file);
 
         KeySpace1 *temp_ks1 = malloc(sizeof(KeySpace1));
-        fseek(table->file, temp_item->key1_index * (int) sizeof(KeySpace1), SEEK_SET);
+        fseek(table->file, temp_item->key1_index * (int) sizeof(KeySpace1) + (int) sizeof(int), SEEK_SET);
         fread(temp_ks1, sizeof(KeySpace1), 1, table->file);
 
         int l1 = temp_ks1->key;
@@ -240,7 +261,6 @@ void print_table(struct Table table) {
 int table_destroyer(struct Table *table) {
     fclose(table->file);
     remove(table->filename);
-    free(table->filename);
     return EXIT_SUCCESS;
 }
 
@@ -258,14 +278,14 @@ struct Table find_range(struct Table *table, int l, int r) {
             fread(temp_item, sizeof(Item), 1, table->file);
 
             KeySpace2 *temp_ks2 = malloc(sizeof(KeySpace2));
-            fseek(table->file, table->ks2_offset + temp_item->key2_index * (int) sizeof(KeySpace2),SEEK_SET);
+            fseek(table->file, table->ks2_offset + temp_item->key2_index * (int) sizeof(KeySpace2), SEEK_SET);
             fread(temp_ks2, sizeof(KeySpace2), 1, table->file);
 
             int fkey = temp_ks1->key, lkey = temp_ks2->key;
             free(temp_ks2);
             free(temp_item);
             if ((fkey >= l) && (fkey <= r)) {
-                char * str = get_str(table, i, 1);
+                char *str = get_str(table, i, 1);
                 char *temp = malloc(sizeof(char) * (int) (strlen(str) + 1));
                 strcpy(temp, str);
                 insert(&result, temp, fkey, lkey);

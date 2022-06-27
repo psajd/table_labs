@@ -1,5 +1,4 @@
 #include "Utils.h"
-#include "errno.h"
 const static int str_length = 100;
 
 void print_info()
@@ -138,9 +137,7 @@ int find_in(struct Table *table)
     char *temp = find(table, k1, k2);
     if (temp != NULL)
     {
-        printf("%s\n", temp);
-        free(temp);
-
+        printf("%s\n", find(table, k1, k2));
         return EXIT_SUCCESS;
     } else
     {

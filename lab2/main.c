@@ -9,13 +9,12 @@ struct a{
 int main() {
     print_info();
     struct Table table = table_initializer(size1, size2, "pop");
-    char *str1 = "sadfa";
-    char *str2 = "dsafas";
+    /*insert(&table, "asdfa", 1, 2);
+    insert(&table, "asdfa123", 2, 3);
+    insert(&table, "123123", 6, 4);*/
+    /*print_table(table);
+    delete_all(&table, 1, 1);    print_table(table);*/
 
-    /*insert(&table, str2, 2, 3);
-    Table t = find_range(&table, 1, 2);
-    insert(&table, str1, 1, 2);
-    print_table(t);*/
     int cmd;
     while (1) {
         if (cli_read_int(&cmd, 1)) {
@@ -45,7 +44,6 @@ int main() {
             fprintf(stderr, "\t%*c\n", 1, '^');
         }
     }
-    table_destroyer(&table);
     return EXIT_SUCCESS;
 
 }

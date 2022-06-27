@@ -30,7 +30,6 @@ typedef struct Table {
     int csize1, csize2;
     char *filename;
     FILE *file;
-
 } Table;
 
 int file_size(FILE *fp);
