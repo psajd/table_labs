@@ -109,7 +109,7 @@ int delete_all(struct Table *table, int k, int ks)
 {
     if (ks == 1)
     {
-        if (search_ks1(table, k) > 0)
+        if (search_ks1(table, k) >= 0)
         {
             int l1 = k;
             int l2 = table->ks2[table->ks1[search_ks1(table, k)].item->key2].key;
