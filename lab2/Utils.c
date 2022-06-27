@@ -1,4 +1,5 @@
 #include "Utils.h"
+#include "errno.h"
 const static int str_length = 100;
 
 void print_info()
@@ -137,13 +138,15 @@ int find_in(struct Table *table)
     char *temp = find(table, k1, k2);
     if (temp != NULL)
     {
-        printf("%s\n", find(table, k1, k2));
+        printf("%s\n", temp);
+        free(temp);
         return EXIT_SUCCESS;
     } else
     {
         return EXIT_FAILURE;
     }
 }
+
 
 int delete_in(struct Table *table)
 {
@@ -231,6 +234,7 @@ int range_in(struct Table *table)
     }
     struct Table t = find_range(table, l, r);
     print_table(t);
+    remove(t.filename);
     table_destroyer(&t);
     return EXIT_SUCCESS;
 }

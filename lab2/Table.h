@@ -44,6 +44,7 @@ int insert_ks1(Table *table, int k, Item *item);
 
 int search_ks2(Table *table, int k);
 
+
 int delete_ks2(Table *table, int k);
 
 int insert_ks2(Table *table, int k, Item *item);

@@ -7,6 +7,7 @@
 #include <string.h>
 
 
+
 void print_info();
 int insert_in(struct Table *table);
 int find_in(struct Table *table);

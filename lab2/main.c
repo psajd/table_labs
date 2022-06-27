@@ -9,9 +9,12 @@ struct a{
 int main() {
     print_info();
     struct Table table = table_initializer(size1, size2, "pop");
-    /*insert(&table, "asdfa", 1, 2);
-    insert(&table, "asdfa123", 2, 3);
-    insert(&table, "123123", 6, 4);*/
+    /*insert(&table, "asdf", 1, 2);
+    insert(&table, "sadfa", 2, 3);
+    delete(&table, 1, 2);
+    insert(&table, "safas", 1, 2);
+    print_table(table);*/
+    //insert(&table, "123123", 6, 4);
     /*print_table(table);
     delete_all(&table, 1, 1);    print_table(table);*/
 
@@ -44,6 +47,8 @@ int main() {
             fprintf(stderr, "\t%*c\n", 1, '^');
         }
     }
+    table_destroyer(&table);
     return EXIT_SUCCESS;
+
 
 }

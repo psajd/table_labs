@@ -8,7 +8,6 @@ struct Table table_initializer(int size1, int size2, const char *filename) {
     FILE *temp = fopen(filename, "r");
 
     if (temp == NULL) {
-        fclose(temp);
         table.file = fopen(filename, "wb+");
         table.csize1 = 0;
         table.csize2 = 0;
@@ -22,6 +21,8 @@ struct Table table_initializer(int size1, int size2, const char *filename) {
 
         struct KeySpace1 *keySpace1 = malloc(sizeof(KeySpace1) * size1);
         for (int i = 0; i < size1; i++) {
+            keySpace1[i].item_offset = -1;
+            keySpace1[i].key = -1;
             keySpace1[i].busy = 0;
         }
         fwrite(keySpace1, sizeof(KeySpace1), size1, table.file);
@@ -29,6 +30,8 @@ struct Table table_initializer(int size1, int size2, const char *filename) {
 
         struct KeySpace2 *keySpace2 = malloc(sizeof(KeySpace2) * size2);
         for (int i = 0; i < size2; i++) {
+            keySpace2[i].item_offset = -1;
+            keySpace2[i].key = -1;
             keySpace2[i].busy = 0;
         }
         fwrite(keySpace2, sizeof(KeySpace2), size2, table.file);
@@ -106,6 +109,7 @@ char *get_str(Table *table, int offset, int ks) {
         return str;
     }
 }
+
 
 char *find(struct Table *table, int k1, int k2) {
     int l1 = search_ks1(table, k1), l2 = search_ks2(table, k2);
@@ -260,7 +264,7 @@ void print_table(struct Table table) {
 
 int table_destroyer(struct Table *table) {
     fclose(table->file);
-    remove(table->filename);
+    free(table->filename);
     return EXIT_SUCCESS;
 }
 
