@@ -26,11 +26,11 @@ int insert(struct Table *table, char *str, int k1, int k2)
     if (insert_ks1(table, k1, temp) == EXIT_SUCCESS && insert_ks2(table, k2, temp) == EXIT_SUCCESS)
     {
         return EXIT_SUCCESS;
-    } else
-    {
+    } else{
         free(str);
-        fprintf(stderr, "Error: table overflow\n");
-        return -2;
+        free(temp);
+        fprintf(stderr, "Error: table overflowed\n");
+        return EXIT_FAILURE;
     }
 }
 

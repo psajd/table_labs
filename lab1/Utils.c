@@ -120,8 +120,11 @@ int insert_in(struct Table *table)
     if (insert(table, str, k1, k2) == EXIT_SUCCESS)
     {
         printf("Successful!\n");
+        return EXIT_SUCCESS;
+    }else{
+        return EXIT_FAILURE;
     }
-    return EXIT_SUCCESS;
+
 }
 
 int find_in(struct Table *table)
@@ -198,7 +201,7 @@ int delete_all_in(struct Table *table)
         return EXIT_FAILURE;
     }
     if (ks != 1 && ks != 2){
-        fprintf(stderr, "Error: keyspace not found");
+        fprintf(stderr, "Error: keyspace not found\n");
         return EXIT_FAILURE;
     }
 
